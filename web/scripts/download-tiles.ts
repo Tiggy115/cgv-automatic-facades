@@ -13,6 +13,7 @@ const token = "pk.eyJ1IjoiZ2V0dGlucWRvd24iLCJhIjoiY2t2NXVnMXY2MTl4cDJ1czNhd3AwNW
 
 //raster tiles
 for (const { x, y, zoom } of availableTiles) {
+    console.log("Load raster tile")
     download(
         getTilePath(zoom, x, y, "png"),
         `https://api.mapbox.com/v4/mapbox.satellite/${zoom}/${x}/${y}@2x.jpg70?access_token=${token}`
@@ -21,6 +22,7 @@ for (const { x, y, zoom } of availableTiles) {
 
 //vector tiles
 for (const { x, y, zoom } of availableTiles) {
+    console.log("Load vector tile")
     download(
         getTilePath(zoom, x, y, "mvt"),
         `https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/${zoom}/${x}/${y}.mvt?access_token=${token}`

@@ -7,10 +7,10 @@ _Computer Generated Verse_
 1. `npm install` to install the library dependencies
 2. `npm run build` to build the cgv library
 3. `cd web` to move into the frontend folder
-4. `npm run install` to install the frontend dependencies
+4. `npm install` to install the frontend dependencies
 5. `npm run dev` to start the frontend
 
-`now access http://localhost:3000/shape or http://localhost:3000/arithmetic to access the respective domain editor`
+`now access http://localhost:3000/cgv to access the respective domain editor`
 
 ### Folder Structure
 

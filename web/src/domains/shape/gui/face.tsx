@@ -46,6 +46,7 @@ function addPointToFace(store: UseBaseStore, step: SelectedSteps) {
     const meterRatio = tileMeterRatio(Math.round(y * zoomRatio), 18)
     const xMeter = ((x * zoomRatio) % 1) * meterRatio
     const yMeter = ((y * zoomRatio) % 1) * meterRatio
+    console.log(xMeter)
     store.getState().replace<"operation">((draft) => {
         draft.children.push({
             type: "operation",

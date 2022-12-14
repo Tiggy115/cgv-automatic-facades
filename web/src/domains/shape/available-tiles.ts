@@ -1,8 +1,9 @@
 type Tile = { zoom: number; x: number; y: number }
 
 const availableTiles: Array<Tile> = [
-    ...generateTileRange(77188, 98509, 77198, 98516, 18), //new york
-    ...generateTileRange(137374, 88769, 137385, 88778, 18), //frankfurt
+    /*...generateTileRange(77188, 98509, 77198, 98516, 18), //new york
+    ...generateTileRange(137374, 88769, 137385, 88778, 18), //frankfurt*/
+    ...generateTileRange(142314, 92130, 142323, 92139, 18), //graz
 ]
 
 const availableTileSet = new Set(availableTiles.map(({ x, y, zoom }) => `${zoom}/${x}/${y}`))

@@ -6,6 +6,7 @@ import { combine, subscribeWithSelector } from "zustand/middleware"
 import { panoramas } from "../global"
 import { lat2tile, lon2tile, Primitive, tileMeterRatio } from "cgv/domains/shape"
 import { locations } from "../geo-search"
+import {UseBaseStore} from "../../../global";
 
 export const FOV = 60
 
@@ -21,6 +22,9 @@ export type PanoramaViewerState = {
     panoramaIndex: number
     rotation: Vector3Tuple
     fov: number
+    facadeName: string
+    store: UseBaseStore
+    selectFacade: boolean
 }
 
 export type FlyViewerState = {
@@ -180,11 +184,13 @@ export function createViewerStateFunctions(set: SetState<ViewerState>, get: GetS
             const state = get()
             const rotation = state.viewType === "satelite" ? panoramaRotation : state.rotation
             const fov = state.viewType === "panorama" ? state.fov : FOV
+            const selectFacade = ""
             set({
                 viewType: "panorama",
                 panoramaIndex,
                 rotation,
                 fov,
+                facadeName: selectFacade
             })
         },
         setError: (error: string | undefined) => {

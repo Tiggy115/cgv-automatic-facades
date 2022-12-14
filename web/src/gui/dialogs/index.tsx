@@ -4,6 +4,7 @@ import { CreateStepDialog } from "./create-step"
 import { SelectionPatternDialog } from "./select-pattern"
 import { SetNameDialog } from "./set-name"
 import { SummarizeDialog } from "./summarize"
+import { SelectFacade} from "./select-facade";
 
 export function Dialogs() {
     const requested = useBaseStoreState((state) => (state.type === "gui" ? state.requested : undefined))
@@ -35,5 +36,7 @@ function selectDialog(data: any, type: string, fulfill: (value: any) => void) {
             return <SetNameDialog fulfill={fulfill} />
         case "select-condition":
             return <SelectionPatternDialog data={data} fulfill={fulfill} />
+        case "select-facade":
+            return <SelectFacade data={data} fulfill={fulfill} />
     }
 }

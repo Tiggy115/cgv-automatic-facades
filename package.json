@@ -44,6 +44,9 @@
         "rxjs": "^7.5.5",
         "three": "^0.139.2",
         "three-csg-ts": "^3.1.10",
-        "three-stdlib": "^2.9.1"
-    }
+        "three-stdlib": "^2.9.1",
+        "axios": "^0.21.1",
+        "react-image-size": "^2.0.0"
+    },
+    "proxy":"http://localhost:5000/"
 }

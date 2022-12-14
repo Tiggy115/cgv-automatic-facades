@@ -1,6 +1,7 @@
-import { RenderTexture, Sphere, useContextBridge, Sky } from "@react-three/drei"
+import {parse} from "cgv"
+import {RenderTexture, Sphere, useContextBridge, Sky} from "@react-three/drei"
 
-import { Canvas, events } from "@react-three/fiber"
+import {Canvas, events} from "@react-three/fiber"
 import {
     convertLotsToSteps,
     convertRoadsToSteps,
@@ -8,30 +9,35 @@ import {
     tileMeterRatio,
     tileZoomRatio,
 } from "cgv/domains/shape"
-import { HTMLProps, DragEvent, useState, useMemo } from "react"
-import { ErrorMessage } from "../../../error-message"
-import { domainContext, UseBaseStore, useBaseStore } from "../../../global"
-import { panoramas } from "../global"
-import { ViewerCamera } from "./camera"
-import { getBackgroundOpacity, getForegroundOpacity, getPosition, useViewerState } from "./state"
-import { ViewControls } from "./view-controls"
-import { BackIcon } from "../../../icons/back"
-import { MultiSelectIcon } from "../../../icons/multi-select"
-import { DescriptionList } from "../../../gui/description-list"
-import { GUI } from "../../../gui"
-import { TextEditorToggle } from "../../../gui/toggles/text"
-import { GeoSearch } from "../geo-search"
-import { BackgroundTile, DescriptionTile, Tiles } from "./tile"
-import { PanoramaView } from "./panorama"
-import { getTileUrl } from "../available-tiles"
-import { DownloadIcon } from "../../../icons/download"
-import { Display } from "./display"
+import {HTMLProps, DragEvent, useState, useMemo} from "react"
+import {ErrorMessage} from "../../../error-message"
+import {domainContext, UseBaseStore, useBaseStore} from "../../../global"
+import {panoramas} from "../global"
+import {ViewerCamera} from "./camera"
+import {FOV, getBackgroundOpacity, getForegroundOpacity, getPosition, useViewerState} from "./state"
+import {ViewControls} from "./view-controls"
+import {ClickFacade} from "./click-facade";
+import {BackIcon} from "../../../icons/back"
+import {MultiSelectIcon} from "../../../icons/multi-select"
+import {DescriptionList} from "../../../gui/description-list"
+import {GUI} from "../../../gui"
+import {TextEditorToggle} from "../../../gui/toggles/text"
+import {GeoSearch} from "../geo-search"
+import {BackgroundTile, DescriptionTile, Tiles} from "./tile"
+import {PanoramaView} from "./panorama"
+import {getTileUrl} from "../available-tiles"
+import {DownloadIcon} from "../../../icons/download"
+import {Display} from "./display"
 import {
+    GeometryUtils,
     Texture,
 } from "three"
-import { VisualSelection } from "./visual-selection"
+import {VisualSelection} from "./visual-selection"
 import Tooltip from "rc-tooltip"
-import { CameraIcon } from "../../../icons/camera"
+import {CameraIcon} from "../../../icons/camera"
+import center = GeometryUtils.center;
+import {parseDescription} from "../../../../../src";
+
 
 export function tileDescriptionSuffix(x: number, y: number): string {
     return `_${x}_${y}`
@@ -45,7 +51,7 @@ function onDrop(store: UseBaseStore, e: DragEvent<HTMLDivElement>) {
     }
 }
 
-export function Viewer({ className, children, ...rest }: HTMLProps<HTMLDivElement>) {
+export function Viewer({className, children, ...rest}: HTMLProps<HTMLDivElement>) {
     const Bridge = useContextBridge(domainContext)
     const store = useBaseStore()
     const [texture, setTexture] = useState<Texture>()
@@ -75,22 +81,24 @@ export function Viewer({ className, children, ...rest }: HTMLProps<HTMLDivElemen
                 dpr={global.window == null ? 1 : window.devicePixelRatio}>
                 <Bridge>
                     <RenderTexture ref={setTexture} attach="map" {...({} as any)}>
-                        <ViewerCamera />
-                        <PanoramaView />
-                        <Skybox />
-                        <Tiles tile={BackgroundTile} />
+                        <ViewerCamera/>
+                        <PanoramaView/>
+                        <Skybox/>
+                        <Tiles tile={BackgroundTile}/>
                     </RenderTexture>
-                    <ViewControls />
-                    <ambientLight intensity={0.5} />
-                    <directionalLight position={[10, 10, 10]} intensity={0.5} />
-                    <Panoramas />
-                    <Tiles tile={DescriptionTile} />
+                    <ViewControls/>
+                    <ClickFacade/>
+                    <ambientLight intensity={0.5}/>
+                    <directionalLight position={[10, 10, 10]} intensity={0.5}/>
+                    <Panoramas/>
+                    <Tiles tile={DescriptionTile}/>
                     <ViewerCamera>
-                        {texture != null && <Background texture={texture} />}
-                        {texture != null && <Foreground texture={texture} />}
+                        {texture != null && <Background texture={texture}/>}
+                        {texture != null && <Foreground texture={texture}/>}
                     </ViewerCamera>
                 </Bridge>
             </Canvas>
+
             <div
                 className="d-flex flex-row justify-content-between position-absolute"
                 style={{
@@ -101,40 +109,42 @@ export function Viewer({ className, children, ...rest }: HTMLProps<HTMLDivElemen
                     top: 0,
                     bottom: 0,
                 }}>
-                <div className="d-flex flex-column my-3 ms-3" style={{ maxWidth: 200 }}>
-                    <GeoSearch style={{ pointerEvents: "all" }} className="mb-3" />
+                <div className="d-flex flex-column my-3 ms-3" style={{maxWidth: 200}}>
+                    <GeoSearch style={{pointerEvents: "all"}} className="mb-3"/>
                     <DescriptionList
                         createDescriptionRequestData={() => {
                             const [globalX, globalY, globalZ] = getPosition(useViewerState.getState())
                             const x = Math.floor(globalX * globalLocalRatio)
                             const y = Math.floor(globalZ * globalLocalRatio)
-                            return { suffix: tileDescriptionSuffix(x, y) }
+                            return {suffix: tileDescriptionSuffix(x, y)}
                         }}
-                        style={{ pointerEvents: "all" }}
+                        style={{pointerEvents: "all"}}
                         className="mb-3">
                         <div className="p-2 border-top border-1">
-                            <div className="w-100 btn-sm btn btn-outline-secondary" onClick={() => generateLots(store)}>
-                                Generate Lots
-                            </div>
-                            <div
-                                className="w-100 btn-sm btn mt-2 btn-outline-secondary"
-                                onClick={() => generateRoads(store)}>
-                                Generate Roads
-                            </div>
-                            <SummarizeButton />
+                            <GenerateFacadeButton/>
+                            <SummarizeButton/>
                         </div>
                     </DescriptionList>
-                    <div className="flex-grow-1" />
-                    <div style={{ pointerEvents: "all" }} className="d-flex flex-row">
-                        <MultiSelectButton className="me-2" />
-                        <VisualSelection className="me-2" />
-                        <ExitStreetViewButton className="me-2" />
+                    <div className="flex-grow-1"/>
+                    <div style={{pointerEvents: "all"}} className="d-flex flex-row">
+                        <MultiSelectButton className="me-2"/>
+                        <VisualSelection className="me-2"/>
+                        <ExitStreetViewButton className="me-2"/>
                         {/*<SpeedSelection className="me-2" />*/}
-                        <DownloadButton className="me-2" />
-                        <FlyCameraButton className="me-2" />
-                        <ShowError />
+                        <DownloadButton className="me-2"/>
+                        <FlyCameraButton className="me-2"/>
+
+                        <ShowError/>
                     </div>
                 </div>
+                <div className="d-flex flex-column my-3">
+                    <SelectionMode/>
+                    <div className="d-flex flex-column my-auto" style={{alignSelf: 'center'}}>
+                        <Crosshair/>
+                    </div>
+                </div>
+
+
                 <div className="d-flex flex-column align-items-end m-3">
                     <GUI
                         className="bg-light border rounded shadow w-100 mb-3 overflow-hidden"
@@ -144,15 +154,39 @@ export function Viewer({ className, children, ...rest }: HTMLProps<HTMLDivElemen
                         }}
                     />
                     <div className="flex-grow-1"></div>
-                    <div className="d-flex flex-row" style={{ pointerEvents: "all" }}>
-                        <TextEditorToggle className="me-2" />
+                    <div className="d-flex flex-row" style={{pointerEvents: "all"}}>
+                        <TextEditorToggle className="me-2"/>
                         {/*<FullscreenToggle rootRef={null} />*/}
                     </div>
                 </div>
+
             </div>
+
             {children}
         </div>
+
     )
+}
+
+
+function SelectionMode() {
+    if (!useViewerState((state) => (state.selectFacade && state.viewType === "panorama")))
+        return null
+    return (
+        <div className={`bg-light border rounded shadow w-100 mb-3 overflow-hidden`} style={{
+            bottom: 0,
+            maxHeight: "10rem",
+        }}>
+            Click on a facade to model
+        </div>
+    )
+
+}
+
+function Crosshair() {
+    if (!useViewerState((state) => (state.selectFacade && state.viewType === "panorama")))
+        return null
+    return (<img src={"icons/crosshair.png"} width="100"/>)
 }
 
 function SummarizeButton() {
@@ -163,6 +197,18 @@ function SummarizeButton() {
             className={`w-100 btn-sm btn mt-2 btn-outline-secondary ${enabled ? "" : "disabled"}`}
             onClick={() => store.getState().request("summarize", undefined, store.getState().selectedDescriptions)}>
             Summarize
+        </div>
+    )
+}
+
+function GenerateFacadeButton() {
+    const store = useBaseStore()
+    const enabled = useViewerState((state) => (!state.facadeName && state.viewType === "panorama"))
+    return (
+        <div
+            className={`w-100 btn-sm btn btn-outline-secondary ${enabled ? "" : "disabled"}`}
+            onClick={() => generateFacade(store)}>
+            Generate Facade
         </div>
     )
 }
@@ -212,10 +258,10 @@ void main() {
 }
 `
 
-function Background({ texture }: { texture: Texture }) {
+function Background({texture}: { texture: Texture }) {
     const visualType = useViewerState((state) => state.visualType)
     const opacity = getBackgroundOpacity(visualType)
-    const uniforms = useMemo(() => ({ map: { value: texture }, opacity: { value: 0 } }), [texture])
+    const uniforms = useMemo(() => ({map: {value: texture}, opacity: {value: 0}}), [texture])
     uniforms.opacity.value = opacity
     return (
         <Display>
@@ -233,10 +279,10 @@ function Background({ texture }: { texture: Texture }) {
     )
 }
 
-function Foreground({ texture }: { texture: Texture }) {
+function Foreground({texture}: { texture: Texture }) {
     const visualType = useViewerState((state) => state.visualType)
     const opacity = getForegroundOpacity(visualType)
-    const uniforms = useMemo(() => ({ map: { value: texture }, opacity: { value: 0 } }), [texture])
+    const uniforms = useMemo(() => ({map: {value: texture}, opacity: {value: 0}}), [texture])
     uniforms.opacity.value = opacity
     return (
         <Display renderOrder={2000}>
@@ -256,20 +302,75 @@ function Foreground({ texture }: { texture: Texture }) {
 }
 
 const zoom = 18
-const globalLocalRatio = tileZoomRatio(0, zoom)
+export const globalLocalRatio = tileZoomRatio(0, zoom)
 
-async function generateLots(store: UseBaseStore) {
+async function generateFacade(store: UseBaseStore) {
+    /*
     const [globalX, , globalZ] = getPosition(useViewerState.getState())
+
     const x = Math.floor(globalX * globalLocalRatio)
     const y = Math.floor(globalZ * globalLocalRatio)
-    const url = getTileUrl(zoom, x, y, "mvt")
-    if (url == null) {
-        return
+    for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+            const url = getTileUrl(zoom, x + dx, y + dy, "mvt")
+            if (url == null) {
+                return
+            }
+            console.log(x + dx, y + dy)
+            console.log(url)
+            const layers = await loadMapLayers(url, y + dy, zoom)
+            console.log(layers)
+            const extent =  tileMeterRatio(y + dy, zoom) //1 tile
+            const newDescriptions = convertLotsToSteps(layers, tileDescriptionSuffix(x + dx, y + dy), "exclude", extent)
+            console.log(newDescriptions)
+            store.getState().addDescriptions(newDescriptions)
+        }
     }
-    const layers = await loadMapLayers(url, y, zoom)
-    const extent = /**1 tile */ tileMeterRatio(y, zoom)
-    const newDescriptions = convertLotsToSteps(layers, tileDescriptionSuffix(x, y), "exclude", extent)
-    store.getState().addDescriptions(newDescriptions)
+    */
+
+
+    const state = useViewerState.getState()
+    if (state.viewType == "panorama" && state.facadeName == "") {
+
+        const [globalX, , globalZ] = getPosition(useViewerState.getState())
+
+        const x = Math.floor(globalX * globalLocalRatio)
+        const y = Math.floor(globalZ * globalLocalRatio)
+
+
+        const panoramaIndex = state.panoramaIndex
+        //console.log(panoramaIndex)
+        if (panoramaIndex == null) {
+            return
+        }
+        //const currentPanorama = panoramas[panoramaIndex]
+        //store.getState().addDescriptions([{name: "test-description_"+x+"_"+y, step: parse("Start --> point2(0,0)")[0].step}])
+
+        /*
+                const rotation = state.rotation
+                const fov =  state.fov
+                const seltFacade = ""
+
+                /*
+                useViewerState.setState({
+                    viewType: "panorama",
+                    panoramaIndex,
+                    rotation,
+                    fov,
+                    selectFacade,
+                    store
+                })*/
+
+        store
+            .getState()
+            .request(
+                "select-facade",
+                (name) => useViewerState.getState().facadeName = name,
+                undefined
+            )
+
+    }
+
 }
 
 async function generateRoads(store: UseBaseStore) {
@@ -291,13 +392,13 @@ function ShowError() {
     if (error == null) {
         return null
     }
-    return <ErrorMessage message={error} align="left" />
+    return <ErrorMessage message={error} align="left"/>
 }
 
 function Panoramas() {
     return (
         <>
-            {panoramas.map(({ position }, index) => (
+            {panoramas.map(({position}, index) => (
                 <Sphere
                     key={index}
                     position={position}
@@ -306,14 +407,14 @@ function Panoramas() {
                         useViewerState.getState().changePanoramaView(index)
                     }}
                     scale={0.00000003}>
-                    <meshBasicMaterial color={0x0000ff} />
+                    <meshBasicMaterial color={0x0000ff}/>
                 </Sphere>
             ))}
         </>
     )
 }
 
-function DownloadButton({ className, ...rest }: HTMLProps<HTMLDivElement>) {
+function DownloadButton({className, ...rest}: HTMLProps<HTMLDivElement>) {
     const store = useBaseStore()
 
     return (
@@ -322,14 +423,14 @@ function DownloadButton({ className, ...rest }: HTMLProps<HTMLDivElement>) {
                 {...rest}
                 onClick={() => store.getState().download()}
                 className={`${className} d-flex align-items-center justify-content-center btn btn-primary btn-sm `}>
-                <DownloadIcon />
+                <DownloadIcon/>
             </div>
         </Tooltip>
     )
 }
 
-function FlyCameraButton({ className, ...rest }: HTMLProps<HTMLDivElement>) {
-    const inFlyCamera = useViewerState(({ viewType }) => viewType === "fly")
+function FlyCameraButton({className, ...rest}: HTMLProps<HTMLDivElement>) {
+    const inFlyCamera = useViewerState(({viewType}) => viewType === "fly")
     return (
         <Tooltip placement="top" overlay="Fly Camera">
             <div
@@ -342,13 +443,13 @@ function FlyCameraButton({ className, ...rest }: HTMLProps<HTMLDivElement>) {
                 className={`${className} d-flex align-items-center justify-content-center btn ${
                     inFlyCamera ? "btn-secondary" : "btn-primary"
                 } btn-sm `}>
-                <CameraIcon />
+                <CameraIcon/>
             </div>
         </Tooltip>
     )
 }
 
-function MultiSelectButton({ className, ...rest }: HTMLProps<HTMLDivElement>) {
+function MultiSelectButton({className, ...rest}: HTMLProps<HTMLDivElement>) {
     const store = useBaseStore()
     const shift = store((s) => (s.type === "gui" ? s.shift : false))
     return (
@@ -360,14 +461,14 @@ function MultiSelectButton({ className, ...rest }: HTMLProps<HTMLDivElement>) {
                 className={`${className} d-flex align-items-center justify-content-center btn ${
                     shift ? "btn-primary" : "btn-secondary"
                 } btn-sm `}>
-                <MultiSelectIcon />
+                <MultiSelectIcon/>
             </div>
         </Tooltip>
     )
 }
 
-function ExitStreetViewButton({ className, ...rest }: HTMLProps<HTMLDivElement>) {
-    const viewType = useViewerState(({ viewType }) => viewType)
+function ExitStreetViewButton({className, ...rest}: HTMLProps<HTMLDivElement>) {
+    const viewType = useViewerState(({viewType}) => viewType)
     if (viewType != "panorama") {
         return null
     }
@@ -377,7 +478,7 @@ function ExitStreetViewButton({ className, ...rest }: HTMLProps<HTMLDivElement>)
                 {...rest}
                 className={`${className} d-flex align-items-center justify-content-center btn btn-sm btn-primary`}
                 onClick={() => useViewerState.getState().backToSateliteView()}>
-                <BackIcon />
+                <BackIcon/>
             </div>
         </Tooltip>
     )

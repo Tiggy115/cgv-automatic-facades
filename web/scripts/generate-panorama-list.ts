@@ -1,7 +1,7 @@
 import { readdirSync, writeFileSync } from "fs"
 import type { Vector3Tuple } from "three"
 
-const searchFolders = ["panoramas/ny", "panoramas/fm"]
+const searchFolders = ["panoramas/graz"]
 
 const baseFolder = "./public/"
 

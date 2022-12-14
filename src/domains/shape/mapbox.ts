@@ -49,6 +49,7 @@ export async function loadMapLayers(url: string, y: number, zoom: number, tilePi
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     const vectorTile = new VectorTile(new Protobuf(data))
+    console.log(vectorTile)
     return Object.entries(vectorTile.layers).reduce((prev, [name, layer]: [string, VectorTileLayer]) => {
         const meterToIntegerRatio = sizeInMeter / layer.extent
         return {
