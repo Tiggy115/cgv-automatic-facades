@@ -80,7 +80,9 @@ function runPython(x: number, img: string) {
     //const ratio = tileMeterRatio(0, 18)
 
 
-    axios.post('http://localhost:5000/flask/facade', {
+    const ip = 'http://localhost:5000'
+
+    axios.post(ip + '/flask/facade', {
         "x": x,
         "img": img
     }).then(response => {
