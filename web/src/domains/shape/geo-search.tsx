@@ -3,7 +3,17 @@ import { debounceTime, EMPTY, filter, from, Subject, switchMap, tap } from "rxjs
 import { useViewerState } from "./viewer/state"
 
 export const locations: Array<{ title: string; lat: number; lon: number }> = [
-    /*{
+    {
+        title: "Klosterwiesgasse 48, 8010 Graz, Austria",
+        lat: 47.0632879,
+        lon: 15.4458986,
+    },
+    {
+        title: "1384 W 10th Ave, Vancouver, BC V6H 1J6, Canada",
+        lat: 49.2626182,
+        lon: -123.1358566,
+    },
+    {
         title: "721 9th Ave, New York, NY 10019, USA",
         lat: 40.7628862,
         lon: -73.9894495,
@@ -12,11 +22,11 @@ export const locations: Array<{ title: string; lat: number; lon: number }> = [
         title: "Feuerbachstraße 25, 60325 Frankfurt am Main, Germany",
         lat: 50.1157581,
         lon: 8.6629498,
-    },*/
+    },
     {
-        title: "Klosterwiesgasse 48, 8010 Graz, Austria",
-        lat: 47.0632879,
-        lon: 15.4458986,
+        title: "Karl Gustavsgatan 6, 411 25 Gothenburg, Sweden",
+        lat: 57.6991459,
+        lon: 11.9665962,
     },
 ]
 

@@ -139,6 +139,7 @@ export function Viewer({className, children, ...rest}: HTMLProps<HTMLDivElement>
                 </div>
                 <div className="d-flex flex-column my-3">
                     <SelectionMode/>
+                    <WaitHint/>
                     <div className="d-flex flex-column my-auto" style={{alignSelf: 'center'}}>
                         <Crosshair/>
                     </div>
@@ -181,6 +182,19 @@ function SelectionMode() {
         </div>
     )
 
+}
+
+function WaitHint(){
+    if (!useViewerState((state) => (!state.selectFacade && state.viewType === "panorama" && state.facadeName != "")))
+        return null
+    return (
+        <div className={`bg-light border rounded shadow w-100 mb-3 overflow-hidden`} style={{
+            bottom: 0,
+            maxHeight: "10rem",
+        }}>
+            Please wait, the facade is generated
+        </div>
+    )
 }
 
 function Crosshair() {

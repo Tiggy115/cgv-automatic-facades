@@ -17,7 +17,7 @@ export function ClickFacade() {
             onDrag: async ({first, xy: [x, y], buttons, event}) => {
                 event.preventDefault()
                 const state = useViewerState.getState()
-                if (first && buttons === 1 && state.viewType == "panorama" && state.facadeName != "") {
+                if (first && buttons === 1 && state.viewType == "panorama" && state.facadeName != "" && state.selectFacade) {
 
                     useViewerState.setState({
                         selectFacade: false
@@ -79,14 +79,14 @@ function runPython(x: number, img: string) {
     //const [globalX, , globalZ] = getPosition(useViewerState.getState())
     //const ratio = tileMeterRatio(0, 18)
 
-
     const ip = 'http://localhost:5000'
+    //const ip = window.location.origin
+    console.log(ip)
 
     axios.post(ip + '/flask/facade', {
         "x": x,
         "img": img
     }).then(response => {
-
         const grammar = response.data["message"]
 
         placeBuilding(grammar)
@@ -108,7 +108,7 @@ function placeBuilding(grammar: string) {
     const name = state.facadeName
 
     //console.log(response.data["message"])
-
+    
     // @ts-ignore
     state.store.getState().addDescriptions([{
         name: name + "_" + x + "_" + y,
