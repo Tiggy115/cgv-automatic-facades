@@ -6,6 +6,7 @@
 /public/icons/*.png
 /public/icons/*.jpg
 
+icons/
 panoramas/
 tiles/
 panoramas-resized/
