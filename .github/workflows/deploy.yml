@@ -2,7 +2,7 @@ name: Depolyment
 
 on:
     push:
-        branches: [main]
+        branches: [deploy]
 
 jobs:
     web-page:

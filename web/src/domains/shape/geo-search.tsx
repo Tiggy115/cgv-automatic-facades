@@ -28,6 +28,11 @@ export const locations: Array<{ title: string; lat: number; lon: number }> = [
         lat: 57.6991459,
         lon: 11.9665962,
     },
+    {
+        title: "Calle de Monteleón, 52, 28010 Madrid, Spanien",
+        lat: 40.4310825,
+        lon: -3.7043947,
+    },
 ]
 
 export function GeoSearch({ className, ...rest }: HTMLProps<HTMLDivElement>) {
